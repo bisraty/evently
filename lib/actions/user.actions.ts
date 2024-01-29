@@ -2,13 +2,15 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { connectToDatabase } from '@/lib/database'
-import User from '@/lib/database/models/user.model'
-import { handleError } from '@/lib/utils'
+import { connectToDatabase } from '../database'
+import User from '../database/models/user.model'
+// import Order from '@/lib/database/models/order.model'
+// import Event from '@/lib/database/models/event.model'
+import { handleError } from '../utils'
 
-import { CreateUserParams, UpdateUserParams } from '@/types'
 import Event from '../database/models/event.modal'
 import Order from '../database/models/order.modal'
+import { CreateUserParams, UpdateUserParams } from '@/types'
 
 export async function createUser(user: CreateUserParams) {
   try {
@@ -47,7 +49,7 @@ export async function updateUser(clerkId: string, user: UpdateUserParams) {
   }
 }
 
-export async function deleteUser(clerkId: string) { 
+export async function deleteUser(clerkId: string) {
   try {
     await connectToDatabase()
 
@@ -58,10 +60,11 @@ export async function deleteUser(clerkId: string) {
       throw new Error('User not found')
     }
 
+    // Unlink relationships
     await Promise.all([
       // Update the 'events' collection to remove references to the user
       Event.updateMany(
-        { _id: { $in: userToDelete.events } }, 
+        { _id: { $in: userToDelete.events } },
         { $pull: { organizer: userToDelete._id } }
       ),
 
